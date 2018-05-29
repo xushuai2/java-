@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="demo.dao.BranchDAO">
+	<resultMap type="demo.Entity.BranchEntity" id="BranchMapping" >
+		<id property="id" column="ID" />
+		<result property="branchid" column="BRANCHID" />
+		<result property="name" column="NAME" />
+		<result property="status" column="STATUS" />
+		<result property="remark" column="REMARK" />
+		<result property="lft" column="LFT" />
+		<result property="rgt" column="RGT" />
+		<result property="fkparent" column="FKPARENT"/>
+		<association columnPrefix="P_" property="parent" column="FKPARENT" javaType="demo.Entity.BranchEntity">
+			<id property="id" column="ID" />
+			<result property="branchid" column="BRANCHID" />
+			<result property="name" column="NAME" />
+			<result property="status" column="STATUS" />
+			<result property="remark" column="REMARK" />
+			<result property="lft" column="LFT" />
+			<result property="rgt" column="RGT" />
+			<result property="fkparent" column="FKPARENT"/>
+		</association>
+	</resultMap>
+	
+	
+	<!-- flushInterval  单位：毫秒 -->
+	<cache type="demo.cms.cache.RedisCache"
+		eviction="LRU"  
+		flushInterval="600000"  
+		size="1024"  
+		readOnly="false"  
+	/>  
+	
+	<!-- <cache type="org.mybatis.caches.ehcache.LoggingEhcache"/> -->
+	
+	<sql id="info">
+		SELECT
+			B.ID,B.BRANCHID,B.NAME,B.FKPARENT,B.STATUS,B.REMARK,B.LFT,B.RGT,
+			P.ID AS P_ID,P.BRANCHID AS P_BRANCHID,P.NAME AS P_NAME,P.FKPARENT AS P_FKPARENT,
+			P.STATUS AS P_STATUS,P.REMARK AS P_REMARK,P.LFT AS P_LFT,P.RGT AS P_RGT
+        FROM 
+        	XSERVER_BRANCH B LEFT JOIN XSERVER_BRANCH P ON B.FKPARENT=P.ID 
+        WHERE
+        	B.STATUS != 99 
+	</sql>
+	
+	<!-- 查询所有可查看到的部门（不能查非本部门或非本部门下级的部门） -->
+	<select id="findAll" parameterType="java.util.HashMap" resultMap="BranchMapping">
+		<include refid="info"/>
+		<if test="name != null">
+			<![CDATA[
+				AND B.NAME LIKE '%${name}%'
+			]]>
+		</if>
+		<![CDATA[
+			AND B.LFT >= #{lft} AND B.RGT <= #{rgt}
+			ORDER BY B.FKPARENT
+		]]>
+	</select>
+	
+	<!-- 查询所有可查看到的部门（不能查非本部门或非本部门下级的部门） -->
+	<select id="getAllBranch" parameterType="java.util.HashMap" resultMap="BranchMapping">
+		<include refid="info"/>
+		ORDER BY B.FKPARENT
+	</select>
+	
+	<!-- 查询单个部门（根据id） -->
+	<select id="get" parameterType="Integer" resultMap="BranchMapping" >
+		<include refid="info" />
+			AND B.ID = #{id}
+	</select>
+	
+	<!-- 查询单个部门（根据部门编号） -->
+	<select id="findbranchid" parameterType="String" resultMap="BranchMapping"  >
+		<include refid="info" />
+			AND B.BRANCHID = #{_parameter}
+	</select>
+	
+	
+	<!-- 增加部门 -->
+	<insert id="save" parameterType="java.util.HashMap" >
+		INSERT INTO XSERVER_BRANCH(BRANCHID,NAME,FKPARENT,STATUS,REMARK,LFT,RGT)
+			VALUES(
+			#{branchid,javaType=String,jdbcType=VARCHAR},
+			#{name,javaType=String,jdbcType=VARCHAR},
+			#{fkparent,javaType=Integer,jdbcType=INTEGER},
+			#{status,javaType=Integer,jdbcType=INTEGER},
+			#{remark,javaType=String,jdbcType=VARCHAR},
+			#{lft,javaType=Integer,jdbcType=INTEGER},
+			#{rgt,javaType=Integer,jdbcType=INTEGER})
+	</insert>
+	
+	
+	<!-- 修改部门 -->
+	<update id="update" parameterType="java.util.HashMap" >
+		UPDATE XSERVER_BRANCH SET 
+		BRANCHID=#{branchid,javaType=String,jdbcType=VARCHAR},
+		NAME=#{name,javaType=String,jdbcType=VARCHAR},
+		FKPARENT=#{fkparent,javaType=Integer,jdbcType=INTEGER},
+		STATUS=#{status,javaType=Integer,jdbcType=INTEGER},
+		REMARK=#{remark,javaType=String,jdbcType=VARCHAR},
+		LFT=#{lft,javaType=Integer,jdbcType=INTEGER},
+		RGT=#{rgt,javaType=Integer,jdbcType=INTEGER} 
+		WHERE 
+		ID=#{id,javaType=Integer,jdbcType=INTEGER}
+	</update>
+	
+	
+	
+	<!-- 部门设备统计 -->
+	<select id="branchDeviceCount" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+		<![CDATA[
+			SELECT
+				B.ID,B.BRANCHID,B.NAME,B.FKPARENT,COUNT(D.ID) AS D_COUNT
+			FROM
+				XSERVER_BRANCH B LEFT JOIN ARM_DEVICE D ON B.ID = D.FKBRANCH AND D.STATUS <> 99
+			WHERE
+				B.STATUS <> 99
+		]]>
+		<if test="lft != null">
+			<![CDATA[
+				AND B.LFT >= #{lft}
+			]]>
+		</if>
+		<if test="rgt != null">
+			<![CDATA[
+				AND B.RGT <= #{rgt}
+			]]>
+		</if>
+		GROUP BY 
+			B.ID,B.BRANCHID,B.NAME,B.FKPARENT 
+	</select>
+	
+	<!-- 部门开卡统计 -->
+	<select id="cardCountList" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+		<![CDATA[
+			SELECT
+				B.ID,B.FKPARENT,B.NAME,B.BRANCHID,COUNT(C.ID) AS C_COUNT
+			FROM
+				XSERVER_BRANCH B LEFT JOIN ARM_CARD C ON B.ID = C.FKBRANCH AND C.STATUS <> 99
+		]]>
+		<if test="stime != null">
+			<![CDATA[
+				AND C.OPENDATE >= '${stime}'
+			]]>
+		</if>
+		<if test="etime != null">
+			<![CDATA[
+				AND C.OPENDATE <= '${etime}'
+			]]>
+		</if>
+		WHERE 
+			1=1
+		<if test="lft != null">
+			<![CDATA[
+				AND B.LFT >= #{lft}
+			]]>
+		</if>
+		<if test="rgt != null">
+			<![CDATA[
+				AND B.RGT <= #{rgt}
+			]]>
+		</if>
+		GROUP BY 
+			B.ID,B.FKPARENT,B.NAME,B.BRANCHID,B.STATUS
+		HAVING
+		<![CDATA[
+			B.STATUS <> 99
+		]]>
+	</select>
+	
+	<!-- 部门回单量统计 -->
+	<select id="branchReceiptCount" parameterType="java.util.HashMap" resultType="java.util.HashMap" >
+		SELECT
+			B.ID,B.BRANCHID,B.NAME,COUNT(BR.ID) AS R_COUNT,B.FKPARENT,
+			SUM(CASE BR.REPRINT WHEN 1 THEN 1 ELSE 0 END) AS R_PRTTIMES,
+			SUM(CASE WHEN BR.PRTTIMES > 1 THEN 1 ELSE 0 END) AS R_MAKETIMES
+		FROM
+			XSERVER_BRANCH B LEFT JOIN (
+				SELECT 
+					R.ID,R.ACTNO,R.NAME,R.DATE,R.PRTTIMES,R.REPRINT,C.ID AS CID,C.CARDNO,B.ID AS BID,B.BRANCHID
+				FROM
+					ARM_RECEIPT R INNER JOIN ARM_ACCOUNT A ON R.ACTNO = A.ACCOUNTNO
+					LEFT JOIN ARM_CARD C ON A.FKCARD = C.ID
+					LEFT JOIN XSERVER_BRANCH B ON C.FKBRANCH = B.ID
+					WHERE 1 = 1 
+					<if test="stime != null">
+						<![CDATA[
+							AND R.DATE >= '${stime}'
+						]]>
+					</if>
+					<if test="etime != null">
+						<![CDATA[
+							AND R.DATE <= '${etime}'
+						]]>
+					</if>
+			) BR ON B.ID = BR.BID
+		WHERE
+		B.STATUS != 99 
+		<if test="lft != null">
+			<![CDATA[
+				AND B.LFT >= #{lft}
+			]]>
+		</if>
+		<if test="rgt != null">
+			<![CDATA[
+				AND B.RGT <= #{rgt}
+			]]>
+		</if>
+		GROUP BY 
+			B.ID,B.BRANCHID,B.NAME,B.FKPARENT,B.STATUS,B.LFT,B.RGT
+	</select>	
+</mapper>

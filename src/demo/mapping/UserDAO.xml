@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="demo.dao.UserDAO">
+	<resultMap type="demo.Entity.UserEntity" id="UserMapping" >
+		<id property="id" column="ID" />
+		<result property="userid" column="USERID" />
+		<result property="name" column="NAME" />
+		<result property="password" column="PASSWORD" />
+		<result property="salt" column="SALT" />
+		<result property="status" column="STATUS" />
+		<result property="fkrole" column="FKROLE" />
+		<result property="fkbranch" column="FKBRANCH"/>
+		<result property="lltime" column="LLTIME"/>
+		<result property="llipaddr" column="LLIPADDR"/>
+		<result property="lcount" column="LCOUNT"/>
+		<result property="lfcount" column="LFCOUNT"/>
+		<result property="mpwd" column="MPWD"/>
+		<result property="lmpwdtime" column="LMPWDTIME"/>
+		<result property="remark" column="REMARK"/>
+		<association columnPrefix="R_" property="role" column="FKROLE" javaType="demo.Entity.RoleEntity">
+			<id property="id" column="ID" />
+			<result property="name" column="NAME" />
+			<result property="status" column="STATUS" />
+			<result property="level" column="LEVEL" />
+			<result property="remark" column="REMARK" />
+		</association>
+		<association columnPrefix="B_" property="branch" column="FKBRANCH" javaType="demo.Entity.BranchEntity">
+			<id property="id" column="ID" />
+			<result property="branchid" column="BRANCHID" />
+			<result property="name" column="NAME" />
+			<result property="status" column="STATUS" />
+			<result property="remark" column="REMARK" />
+			<result property="lft" column="LFT" />
+			<result property="rgt" column="RGT" />
+			<result property="fkparent" column="FKPARENT"/>
+		</association>
+	</resultMap>
+	
+	<sql id="info">
+		SELECT 
+			U.ID,U.USERID,U.NAME,U.PASSWORD,U.SALT,U.STATUS,U.FKROLE,U.FKBRANCH,U.LLTIME,U.LLIPADDR,U.LCOUNT,
+			U.LFCOUNT,U.MPWD,U.LMPWDTIME,U.REMARK,R.ID AS R_ID,R.NAME AS R_NAME,R.STATUS AS R_STATUS,
+			R.LEVEL AS R_LEVEL,R.REMARK AS R_REMARK,B.ID AS B_ID,B.BRANCHID AS B_BRANCHID,B.NAME AS B_NAME,
+			B.STATUS AS B_STATUS,B.REMARK AS B_REMARK,B.LFT AS B_LFT,B.RGT AS B_RGT,B.FKPARENT AS B_FKPARENT
+		FROM
+			XSERVER_USER U INNER JOIN XSERVER_BRANCH B ON U.FKBRANCH = B.ID
+			INNER JOIN XSERVER_ROLE R ON U.FKROLE = R.ID
+		WHERE
+			U.STATUS != 99
+	</sql>
+	
+	<!-- 查询所有 -->
+	<select id="findAll" parameterType="java.util.HashMap" resultMap="UserMapping">
+		<include refid="info"/>
+		<if test="userid != null">
+			<![CDATA[
+				AND U.USERID LIKE '%${userid}%'
+			]]>
+		</if>
+		<if test="fkbranch != null">
+			<![CDATA[
+				AND B.ID = #{fkbranch}
+			]]>
+		</if>
+		<if test="fkbranch == null and lft != null and rgt != null">
+			<![CDATA[
+				AND B.LFT >= #{lft} AND B.RGT <= #{rgt}
+			]]>
+		</if>
+		ORDER BY U.ID DESC
+	</select>
+	
+	<!-- 查询某个（根据id） -->
+	<select id="findId" parameterType="Integer" resultMap="UserMapping">
+		<include refid="info"/>
+		AND U.ID = #{id}
+	</select>
+	
+	<!-- 查询某个（根据用户编号） -->
+	<select id="findByUserid" parameterType="String" resultMap="UserMapping">
+		<include refid="info"/>
+		<![CDATA[
+		AND U.USERID = #{userid}
+		]]>
+	</select>
+	
+	<!-- 查询用户（根据角色查） -->
+	<select id="findFkroleid" parameterType="Integer" resultMap="UserMapping">
+		<include refid="info"/>
+		<![CDATA[
+			AND U.FKROLE = #{roleid}
+		]]>
+	</select>
+	
+	<!-- 查询用户（根据部门查） -->
+	<select id="findFkbranchid" parameterType="Integer" resultMap="UserMapping">
+		<include refid="info"/>
+		<![CDATA[
+			AND U.FKBRANCH = #{branchid}
+		]]>
+	</select>
+	
+	<!-- 增加 -->
+	<insert id="save" parameterType="demo.Entity.UserEntity">
+		INSERT INTO XSERVER_USER 
+		(USERID,NAME,PASSWORD,SALT,STATUS,FKROLE,FKBRANCH,LLTIME,LLIPADDR,LCOUNT,LFCOUNT,MPWD,LMPWDTIME,REMARK)
+		VALUES
+		(#{userid,javaType=String,jdbcType=VARCHAR},
+		#{name,javaType=String,jdbcType=VARCHAR},
+		#{password,javaType=String,jdbcType=VARCHAR},
+		#{salt,javaType=String,jdbcType=VARCHAR},
+		#{status,javaType=Integer,jdbcType=INTEGER},
+		#{fkrole,javaType=Integer,jdbcType=INTEGER},
+		#{fkbranch,javaType=Integer,jdbcType=INTEGER},
+		#{lltime,javaType=String,jdbcType=TIMESTAMP},
+		#{llipaddr,javaType=String,jdbcType=VARCHAR},
+		#{lcount,javaType=Integer,jdbcType=INTEGER},
+		#{lfcount,javaType=Integer,jdbcType=INTEGER},
+		#{mpwd,javaType=Integer,jdbcType=INTEGER},
+		#{lmpwdtime,javaType=String,jdbcType=TIMESTAMP},
+		#{remark,javaType=String,jdbcType=VARCHAR})
+	</insert>
+	
+	<!-- 修改 -->
+	<update id="update" parameterType="demo.Entity.UserEntity">
+		UPDATE XSERVER_USER SET
+			USERID=#{userid,javaType=String,jdbcType=VARCHAR},
+			NAME=#{name,javaType=String,jdbcType=VARCHAR},
+			PASSWORD=#{password,javaType=String,jdbcType=VARCHAR},
+			SALT=#{salt,javaType=String,jdbcType=VARCHAR},
+			STATUS=#{status,javaType=Integer,jdbcType=INTEGER},
+			FKROLE=#{fkrole,javaType=Integer,jdbcType=INTEGER},
+			FKBRANCH=#{fkbranch,javaType=Integer,jdbcType=INTEGER},
+			LLTIME=#{lltime,javaType=String,jdbcType=TIMESTAMP},
+			LLIPADDR=#{llipaddr,javaType=String,jdbcType=VARCHAR},
+			LCOUNT=#{lcount,javaType=Integer,jdbcType=INTEGER},
+			LFCOUNT=#{lfcount,javaType=Integer,jdbcType=INTEGER},
+			MPWD=#{mpwd,javaType=Integer,jdbcType=INTEGER},
+			LMPWDTIME=#{lmpwdtime,javaType=String,jdbcType=TIMESTAMP},
+			REMARK=#{remark,javaType=String,jdbcType=VARCHAR}
+		WHERE 
+			ID=#{id,javaType=Integer,jdbcType=INTEGER}
+	</update>
+	
+</mapper>

@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="demo.dao.AppStatisticsMapper" >
+  <resultMap id="BaseResultMap" type="demo.Entity.AppStatistics" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="appId" property="appid" jdbcType="INTEGER" />
+    <result column="appName" property="appname" jdbcType="VARCHAR" />
+    <result column="request" property="request" jdbcType="BIGINT" />
+    <result column="click" property="click" jdbcType="BIGINT" />
+    <result column="imp" property="imp" jdbcType="BIGINT" />
+    <result column="revenue" property="revenue" jdbcType="DOUBLE" />
+    <result column="statisticalDate" property="statisticaldate" jdbcType="DATE" />
+    <result column="wTime" property="wtime" jdbcType="TIMESTAMP" />
+    <result column="conversion" property="conversion" jdbcType="INTEGER" />
+    <result column="eCPM" property="ecpm" jdbcType="DOUBLE" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    id, appId, appName, request, click, imp, revenue, statisticalDate, wTime, conversion, 
+    eCPM
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from t_app_statistics
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from t_app_statistics
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="demo.Entity.AppStatistics" >
+    insert into t_app_statistics (id, appId, appName, 
+      request, click, imp, revenue, 
+      statisticalDate, wTime, conversion, 
+      eCPM)
+    values (#{id,jdbcType=INTEGER}, #{appid,jdbcType=INTEGER}, #{appname,jdbcType=VARCHAR}, 
+      #{request,jdbcType=BIGINT}, #{click,jdbcType=BIGINT}, #{imp,jdbcType=BIGINT}, #{revenue,jdbcType=DOUBLE}, 
+      #{statisticaldate,jdbcType=DATE}, #{wtime,jdbcType=TIMESTAMP}, #{conversion,jdbcType=INTEGER}, 
+      #{ecpm,jdbcType=DOUBLE})
+  </insert>
+  <insert id="insertSelective" parameterType="demo.Entity.AppStatistics" >
+    insert into t_app_statistics
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="appid != null" >
+        appId,
+      </if>
+      <if test="appname != null" >
+        appName,
+      </if>
+      <if test="request != null" >
+        request,
+      </if>
+      <if test="click != null" >
+        click,
+      </if>
+      <if test="imp != null" >
+        imp,
+      </if>
+      <if test="revenue != null" >
+        revenue,
+      </if>
+      <if test="statisticaldate != null" >
+        statisticalDate,
+      </if>
+      <if test="wtime != null" >
+        wTime,
+      </if>
+      <if test="conversion != null" >
+        conversion,
+      </if>
+      <if test="ecpm != null" >
+        eCPM,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="appid != null" >
+        #{appid,jdbcType=INTEGER},
+      </if>
+      <if test="appname != null" >
+        #{appname,jdbcType=VARCHAR},
+      </if>
+      <if test="request != null" >
+        #{request,jdbcType=BIGINT},
+      </if>
+      <if test="click != null" >
+        #{click,jdbcType=BIGINT},
+      </if>
+      <if test="imp != null" >
+        #{imp,jdbcType=BIGINT},
+      </if>
+      <if test="revenue != null" >
+        #{revenue,jdbcType=DOUBLE},
+      </if>
+      <if test="statisticaldate != null" >
+        #{statisticaldate,jdbcType=DATE},
+      </if>
+      <if test="wtime != null" >
+        #{wtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="conversion != null" >
+        #{conversion,jdbcType=INTEGER},
+      </if>
+      <if test="ecpm != null" >
+        #{ecpm,jdbcType=DOUBLE},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="demo.Entity.AppStatistics" >
+    update t_app_statistics
+    <set >
+      <if test="appid != null" >
+        appId = #{appid,jdbcType=INTEGER},
+      </if>
+      <if test="appname != null" >
+        appName = #{appname,jdbcType=VARCHAR},
+      </if>
+      <if test="request != null" >
+        request = #{request,jdbcType=BIGINT},
+      </if>
+      <if test="click != null" >
+        click = #{click,jdbcType=BIGINT},
+      </if>
+      <if test="imp != null" >
+        imp = #{imp,jdbcType=BIGINT},
+      </if>
+      <if test="revenue != null" >
+        revenue = #{revenue,jdbcType=DOUBLE},
+      </if>
+      <if test="statisticaldate != null" >
+        statisticalDate = #{statisticaldate,jdbcType=DATE},
+      </if>
+      <if test="wtime != null" >
+        wTime = #{wtime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="conversion != null" >
+        conversion = #{conversion,jdbcType=INTEGER},
+      </if>
+      <if test="ecpm != null" >
+        eCPM = #{ecpm,jdbcType=DOUBLE},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  
+  <update id="updateByPrimaryKey" parameterType="demo.Entity.AppStatistics" >
+    update t_app_statistics
+    set appId = #{appid,jdbcType=INTEGER},
+      appName = #{appname,jdbcType=VARCHAR},
+      request = #{request,jdbcType=BIGINT},
+      click = #{click,jdbcType=BIGINT},
+      imp = #{imp,jdbcType=BIGINT},
+      revenue = #{revenue,jdbcType=DOUBLE},
+      statisticalDate = #{statisticaldate,jdbcType=DATE},
+      wTime = #{wtime,jdbcType=TIMESTAMP},
+      conversion = #{conversion,jdbcType=INTEGER},
+      eCPM = #{ecpm,jdbcType=DOUBLE}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  
+  <update id="updateByDuoXC" parameterType="demo.Entity.AppStatistics" >
+   <![CDATA[   update t_app_statistics
+    	set 
+      conversion = conversion-1 
+    where id = #{id,jdbcType=INTEGER}
+      and 
+      conversion > 0
+      ]]>
+  </update>
+  
+  
+   <!-- #{}与${}的不同：
+   通过${}可以将parameterType传入的内容拼接在sql中，并且不进行jdbc类型转换，${}可以接受简单类型和pojo的属性值，若parameterType为单个简单类型时，${}中必须使用value。使用${}不能防止sql注入，但有时会很方便，例如：
+ 
+[html] view plain copy print?在CODE上查看代码片派生到我的代码片
+<select id="findUserByUsername" parameterType="java.lang.String" resultType="User">  
+            SELECT * FROM USER WHERE username LIKE '%${value}%'  
+</select>  
+
+再比如order by排序，如果将列名通过参数传入sql，根据传的列名进行排序，应该写为：
+ORDER BY${columnName}
+如果使用#{}将无法实现此功能。 -->
+  
+  
+  
+  <select id="getBarChart" parameterType="java.lang.String" resultType="demo.Entity.AppStatistics">
+  SELECT
+	<!-- <if test="type=='request'">
+	sum(request) request,
+	</if>
+	<if test="type=='click'">
+	sum(click) click,
+	</if>
+	<if test="type=='imp'">
+	sum(imp) imp,
+	</if>
+	<if test="type=='revenue'">
+	sum(revenue) revenue,
+	</if>
+	<if test="type=='conversion'">
+	sum(conversion) conversion,
+	</if>
+	<if test="type=='eCPM'">
+	sum(eCPM) eCPM,
+	</if>  -->
+	sum(${type}) ${type},
+	appId,
+	appName
+FROM
+	t_app_statistics
+GROUP BY
+	appId
+ORDER BY
+	sum(${type})
+	DESC
+LIMIT 2
+  </select>
+</mapper>

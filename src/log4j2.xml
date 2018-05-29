@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration status="error">
+	<!-- 日志级别顺序为 TRACE < DEBUG < INFO < WARN < ERROR < FATAL -->
+	<appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout charset="UTF-8"
+				pattern="%d{yyyy.MM.dd 'at' HH:mm:ss z} %-5level %class{36} %L %M - %msg%xEx%n" />
+		</Console>
+		<RollingFile name="RollingFile" fileName="E:/xushuai-redis-logs/redislogs.log"
+			filePattern="E:/xushuai-redis-logs/redislogs-%d{MM-dd-yyyy}-%i.log.gz">
+			<PatternLayout
+				pattern="%d{yyyy.MM.dd 'at' HH:mm:ss z} %-5level %class{36} %L %M - %msg%xEx%n" />
+			<SizeBasedTriggeringPolicy size="1MB" />
+		</RollingFile>
+	</appenders>
+	<loggers>
+		<logger name="log4j.logger.org.hibernate.type" level="trace"
+			additivity="false">
+			<appender-ref ref="Console" />
+		</logger>
+		<logger name="com.mchange.v2.resourcepool.BasicResourcePool"
+			level="info" additivity="false">
+			<appender-ref ref="RollingFile" />
+			<appender-ref ref="Console" />
+		</logger>
+		<root level="info">
+			<appender-ref ref="RollingFile" />
+			<appender-ref ref="Console" />
+		</root>
+	</loggers>
+
+</configuration>  

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="demo.dao.RoleDAO">
+	<resultMap type="demo.Entity.RoleEntity" id="RoleMapping" >
+		<id property="id" column="ID" />
+		<result property="name" column="NAME" />
+		<result property="status" column="STATUS" />
+		<result property="level" column="LEVEL" />
+		<result property="remark" column="REMARK" />
+	</resultMap>
+	
+	<!-- 查询所有的未删除的角色 -->
+	<select id="findAll" parameterType="java.util.HashMap" resultMap="RoleMapping">
+		SELECT 
+			ID,NAME,STATUS,LEVEL,REMARK
+		FROM
+			XSERVER_ROLE
+		WHERE
+			STATUS != 99
+		<if test="name != null">
+			AND NAME = #{NAME}
+		</if>
+		<if test="level != null">
+			AND LEVEL >= #{level}
+		</if>
+	</select>
+	
+	<!-- 查询某个角色 (根据id)-->
+	<select id="findId" parameterType="Integer" resultMap="RoleMapping">
+		SELECT
+			R.ID,R.NAME,R.STATUS,R.LEVEL,R.REMARK
+		FROM
+			XSERVER_ROLE R 
+		WHERE
+			R.ID = #{id,javaType=Integer,jdbcType=INTEGER}
+	</select>
+	<!-- 查询某个角色（根据角色名称） -->
+	<select id="findRoleName" parameterType="String" resultMap="RoleMapping">
+		SELECT
+			R.ID,R.NAME,R.STATUS,R.LEVEL,R.REMARK
+		FROM
+			XSERVER_ROLE R 
+		WHERE
+			R.NAME = #{_parameter}
+	</select>
+	
+	<!-- 添加一个角色 -->
+	<insert id="save" parameterType="demo.Entity.RoleEntity">
+		INSERT INTO XSERVER_ROLE (NAME,LEVEL,REMARK,STATUS) 
+			VALUES 
+			(
+				#{name,javaType=String,jdbcType=VARCHAR},
+				#{level,javaType=Integer,jdbcType=INTEGER},
+				#{remark,javaType=String,jdbcType=VARCHAR},
+				#{status,javaType=Integer,jdbcType=INTEGER}
+			)
+	</insert>
+	
+	<!-- 修改角色 -->
+	<update id="update" parameterType="demo.Entity.RoleEntity">
+		UPDATE XSERVER_ROLE
+			SET NAME=#{name,javaType=String,jdbcType=VARCHAR},
+			LEVEL=#{level,javaType=Integer,jdbcType=INTEGER},
+			REMARK=#{remark,javaType=String,jdbcType=VARCHAR},
+			STATUS=#{status,javaType=Integer,jdbcType=INTEGER} 
+		WHERE ID=#{id,javaType=Integer,jdbcType=INTEGER}
+	</update>
+	
+	
+</mapper>

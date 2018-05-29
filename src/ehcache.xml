@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>   
+<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd">    
+    <!-- 设置缓存文件 .data 的创建路径。
+         如果该路径是 Java 系统参数，当前虚拟机会重新赋值。
+         下面的参数这样解释：
+	user.home – 用户主目录
+	user.dir      – 用户当前工作目录
+	java.io.tmpdir – 默认临时文件路径  -->
+    <diskStore path="user.home/web_ehcache/" />     
+        
+    <defaultCache    
+            maxElementsInMemory="3000"    
+            eternal="false"    
+            timeToIdleSeconds="3600"    
+            timeToLiveSeconds="3600"    
+            overflowToDisk="true"    
+            diskPersistent="false"    
+            diskExpiryThreadIntervalSeconds="100"    
+            memoryStoreEvictionPolicy="LRU"    
+            />    
+    <cache name="serviceCache"    
+           maxElementsInMemory="3000"    
+           eternal="false"    
+           overflowToDisk="true"    
+           timeToIdleSeconds="36000"    
+           timeToLiveSeconds="36000"    
+           memoryStoreEvictionPolicy="LFU"    
+            />    
+</ehcache>  

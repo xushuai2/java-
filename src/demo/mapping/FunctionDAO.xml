@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="demo.dao.FunctionDAO">
+	<resultMap type="demo.Entity.FunctionEntity" id="FunctionMapping" >
+		<id property="id" column="ID" />
+		<result property="fkparent" column="FKPARENT" />
+		<result property="name" column="NAME" />
+		<result property="url" column="URL" />
+		<result property="whitelist" column="WHITELIST" />
+		<result property="menu" column="MENU" />
+		<result property="pos" column="POS" />
+		<result property="remark" column="REMARK" />
+		<result property="level" column="LEVEL" />
+		<association columnPrefix="P_" property="parent" column="FKPARENT" javaType="demo.Entity.FunctionEntity">
+			<id property="id" column="ID" />
+			<result property="fkparent" column="FKPARENT" />
+			<result property="name" column="NAME" />
+			<result property="url" column="URL" />
+			<result property="whitelist" column="WHITELIST" />
+			<result property="menu" column="MENU" />
+			<result property="pos" column="POS" />
+			<result property="remark" column="REMARK" />
+			<result property="level" column="LEVEL" />
+		</association>
+	</resultMap>
+	
+	<!-- 查询所有权限 -->
+	<select id="findAll" resultMap="FunctionMapping">
+		SELECT 
+			F.ID,
+			F.FKPARENT,
+			F.NAME,
+			F.URL,
+			F.WHITELIST,
+			F.MENU,
+			F.POS,
+			F.REMARK,
+			F.LEVEL,
+			P.ID AS P_ID,
+			P.FKPARENT AS P_FKPARENT,
+			P.NAME AS P_NAME,
+			P.WHITELIST AS P_WHITELIST,
+			P.MENU AS P_MUNU,
+			P.POS AS P_POS,
+			P.REMARK AS P_REMARK,
+			P.LEVEL AS P_LEVEL
+		FROM
+			XSERVER_FUNCTION F 
+		LEFT JOIN 
+			XSERVER_FUNCTION P
+		ON F.FKPARENT=P.ID
+	</select>
+	
+</mapper>

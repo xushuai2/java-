@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="demo.dao.RoleFunctionmapDAO">
+	<resultMap type="demo.Entity.RoleFunctionMap" id="RoleFunctionMapMapping" >
+		<id property="id" column="ID" />
+		<result property="fkrole" column="FKROLE" />
+		<result property="fkfunction" column="FKFUNCTION" />
+		<result property="purview" column="PURVIEW" />
+		<association columnPrefix="R_" property="role" column="FKROLE" javaType="demo.Entity.RoleEntity">
+			<id property="id" column="ID" />
+			<result property="name" column="NAME" />
+			<result property="status" column="STATUS" />
+			<result property="level" column="LEVEL" />
+			<result property="remark" column="REMARK" />
+		</association>
+	</resultMap>
+	
+	<sql id="info">
+		<![CDATA[
+		SELECT
+			RF.ID,RF.FKROLE,RF.FKFUNCTION,RF.PURVIEW,R.ID AS R_ID,R.NAME AS R_NAME,
+			R.STATUS AS R_STATUS,R.LEVEL AS R_LEVEL,R.REMARK AS R_REMARK
+		FROM
+			XSERVER_ROLEFUNCTIONMAP RF INNER JOIN XSERVER_ROLE R ON RF.FKROLE = R.ID
+		WHERE
+			R.STATUS <> 99
+		]]>
+	</sql>
+	
+	<!-- 根据角色id查询权限 -->
+	<select id="findRoleId" parameterType="Integer" resultMap="RoleFunctionMapMapping">
+		<include refid="info"/>
+		AND R.ID = #{id}
+	</select>
+	
+	<!-- 删除某个角色的时候调用 -->
+	<delete id="deleteRoleAll" parameterType="Integer">
+		DELETE FROM XSERVER_ROLEFUNCTIONMAP WHERE FKROLE = #{fkroleid}
+	</delete>
+	
+	<!-- 修改某个角色的时候调用 -->
+	<delete id="updateRole" parameterType="java.util.HashMap">
+		DELETE FROM XSERVER_ROLEFUNCTIONMAP WHERE FKROLE = ${fkroleid} AND FKFUNCTION IN (${fkfunctions})
+	</delete>
+	
+	<!-- 添加（增加角色和修改角色的时候调用） -->
+	<insert id="save" parameterType="demo.Entity.RoleFunctionMap">
+		INSERT INTO XSERVER_ROLEFUNCTIONMAP (FKROLE,FKFUNCTION,PURVIEW)  
+		VALUES (#{fkrole},#{fkfunction},#{purview})
+	</insert>
+	
+</mapper>
